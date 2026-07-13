@@ -2,12 +2,16 @@ import { useProducts } from "@/lib/store";
 import { formatPrice, cn } from "@/lib/utils";
 import { RootLayout } from "@/components/layout/RootLayout";
 import { motion } from "framer-motion";
-import { ArrowUpRight } from "lucide-react";
+import { ArrowUpRight, ArrowUpLeft } from "lucide-react";
 import { useState } from "react";
+import { useLanguage } from "@/lib/language-context";
 
 export default function Home() {
   const { products, isLoaded } = useProducts();
   const [hoveredId, setHoveredId] = useState<string | null>(null);
+  const { t, dir } = useLanguage();
+
+  const isRTL = dir === "rtl";
 
   const container = {
     hidden: { opacity: 0 },
@@ -38,14 +42,15 @@ export default function Home() {
             transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
           >
             <div className="inline-flex items-center rounded-full border border-border/50 bg-secondary/50 px-3 py-1 text-xs font-medium text-muted-foreground mb-6 backdrop-blur-sm">
-              <span className="flex h-2 w-2 rounded-full bg-primary mr-2"></span>
-              New arrivals daily
+              <span className={cn(
+                "flex h-2 w-2 rounded-full bg-primary",
+                isRTL ? "ml-2" : "mr-2"
+              )}></span>
+              {t("hero.tag")}
             </div>
-            <h1 className="font-serif text-5xl md:text-7xl lg:text-8xl font-bold tracking-tighter mb-6">
-              COVETED.<br className="hidden md:block"/> CURATED.
-            </h1>
+            <h1 className="font-serif text-5xl md:text-7xl lg:text-8xl font-bold tracking-tighter mb-6" dangerouslySetInnerHTML={{ __html: t("hero.title") }} />
             <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-10 leading-relaxed">
-              The premier destination for authenticated premium sneakers. Buy, sell, and discover the most sought-after silhouettes in the world.
+              {t("hero.subtitle")}
             </p>
           </motion.div>
         </div>
@@ -54,13 +59,13 @@ export default function Home() {
       {/* Grid Section */}
       <section className="container mx-auto px-6 pb-24">
         <div className="flex items-end justify-between mb-8">
-          <h2 className="font-serif text-3xl font-bold tracking-tight">Trending Now</h2>
-          <span className="text-sm text-muted-foreground hidden sm:inline-block">Showing {products.length} pairs</span>
+          <h2 className="font-serif text-3xl font-bold tracking-tight">{t("trending.title")}</h2>
+          <span className="text-sm text-muted-foreground hidden sm:inline-block">{t("trending.count", { count: products.length })}</span>
         </div>
         
         {products.length === 0 ? (
           <div className="py-20 text-center border border-dashed border-border rounded-xl">
-            <p className="text-muted-foreground">No sneakers listed yet.</p>
+            <p className="text-muted-foreground">{t("trending.empty")}</p>
           </div>
         ) : (
           <motion.div 
@@ -76,7 +81,6 @@ export default function Home() {
                 className="group cursor-pointer flex flex-col"
                 onMouseEnter={() => setHoveredId(product.id)}
                 onMouseLeave={() => setHoveredId(null)}
-                data-testid={`card-product-${product.id}`}
               >
                 <div className="relative aspect-square rounded-xl bg-secondary/30 border border-border/40 overflow-hidden mb-4 p-6 transition-colors group-hover:bg-secondary/50 group-hover:border-border/80 flex items-center justify-center">
                   <img 
@@ -90,10 +94,11 @@ export default function Home() {
                   
                   {/* Hover Overlay */}
                   <div className={cn(
-                    "absolute top-4 right-4 w-10 h-10 bg-background/80 backdrop-blur-md rounded-full flex items-center justify-center border border-border/50 transition-all duration-300",
+                    "absolute top-4 w-10 h-10 bg-background/80 backdrop-blur-md rounded-full flex items-center justify-center border border-border/50 transition-all duration-300",
+                    isRTL ? "left-4" : "right-4",
                     hoveredId === product.id ? "opacity-100 scale-100" : "opacity-0 scale-90"
                   )}>
-                    <ArrowUpRight className="w-5 h-5" />
+                    {isRTL ? <ArrowUpLeft className="w-5 h-5" /> : <ArrowUpRight className="w-5 h-5" />}
                   </div>
                 </div>
                 

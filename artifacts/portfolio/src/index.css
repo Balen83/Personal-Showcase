@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Syne:wght@400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Syne:wght@400;500;600;700;800&family=Vazirmatn:wght@400;500;600;700;800&display=swap');
 @import 'tailwindcss';
 @import 'tw-animate-css';
 @plugin "@tailwindcss/typography";
@@ -79,6 +79,11 @@
   --app-font-sans: 'Plus Jakarta Sans', sans-serif;
   --app-font-serif: 'Syne', sans-serif;
   --radius: 0.5rem;
+}
+
+html.font-arabic {
+  --app-font-sans: 'Vazirmatn', sans-serif;
+  --app-font-serif: 'Vazirmatn', sans-serif;
 }
 
 @layer base {

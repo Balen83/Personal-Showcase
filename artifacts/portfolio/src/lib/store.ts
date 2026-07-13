@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import sneaker1 from "@assets/generated_images/sneaker_1.png";
 import sneaker2 from "@assets/generated_images/sneaker_2.png";
 import sneaker3 from "@assets/generated_images/sneaker_3.png";
@@ -47,8 +47,8 @@ export function useProducts() {
   const [products, setProducts] = useState<Product[]>([]);
   const [isLoaded, setIsLoaded] = useState(false);
 
-  useEffect(() => {
-    const stored = localStorage.getItem("kicks_products");
+  const loadProducts = useCallback(() => {
+    const stored = localStorage.getItem("hb_products");
     if (stored) {
       try {
         const parsed = JSON.parse(stored);
@@ -63,10 +63,32 @@ export function useProducts() {
     }
     
     // Seed if empty
-    localStorage.setItem("kicks_products", JSON.stringify(SEED_PRODUCTS));
+    localStorage.setItem("hb_products", JSON.stringify(SEED_PRODUCTS));
     setProducts(SEED_PRODUCTS);
     setIsLoaded(true);
   }, []);
+
+  useEffect(() => {
+    loadProducts();
+
+    const handleStorage = (e: StorageEvent) => {
+      if (e.key === "hb_products") {
+        loadProducts();
+      }
+    };
+
+    const handleCustomSync = () => {
+      loadProducts();
+    };
+
+    window.addEventListener('storage', handleStorage);
+    window.addEventListener('hb_products_sync', handleCustomSync);
+    
+    return () => {
+      window.removeEventListener('storage', handleStorage);
+      window.removeEventListener('hb_products_sync', handleCustomSync);
+    };
+  }, [loadProducts]);
 
   const addProduct = (product: Omit<Product, "id">) => {
     const newProduct: Product = {
@@ -74,11 +96,21 @@ export function useProducts() {
       id: Math.random().toString(36).substring(2, 9)
     };
     
-    setProducts(prev => {
-      const updated = [newProduct, ...prev];
-      localStorage.setItem("kicks_products", JSON.stringify(updated));
-      return updated;
-    });
+    const stored = localStorage.getItem("hb_products");
+    let currentProducts = SEED_PRODUCTS;
+    if (stored) {
+      try {
+        const parsed = JSON.parse(stored);
+        if (parsed && parsed.length > 0) {
+          currentProducts = parsed;
+        }
+      } catch (e) {}
+    }
+
+    const updated = [newProduct, ...currentProducts];
+    localStorage.setItem("hb_products", JSON.stringify(updated));
+    setProducts(updated);
+    window.dispatchEvent(new Event('hb_products_sync'));
   };
 
   return { products, addProduct, isLoaded };

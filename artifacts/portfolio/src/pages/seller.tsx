@@ -11,19 +11,23 @@ import * as z from "zod";
 import { useLocation } from "wouter";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
-
-const formSchema = z.object({
-  name: z.string().min(2, "Name must be at least 2 characters"),
-  price: z.coerce.number().positive("Price must be greater than 0"),
-  imageUrl: z.string().url("Must be a valid URL"),
-  description: z.string().min(10, "Description must be at least 10 characters"),
-});
-
-type FormValues = z.infer<typeof formSchema>;
+import { useLanguage } from "@/lib/language-context";
+import { cn } from "@/lib/utils";
 
 export default function Seller() {
   const { addProduct } = useProducts();
   const [, setLocation] = useLocation();
+  const { t, dir } = useLanguage();
+  const isRTL = dir === "rtl";
+
+  const formSchema = z.object({
+    name: z.string().min(2, t("error.name")),
+    price: z.coerce.number().positive(t("error.price")),
+    imageUrl: z.string().url(t("error.url")),
+    description: z.string().min(10, t("error.desc")),
+  });
+
+  type FormValues = z.infer<typeof formSchema>;
 
   const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -38,8 +42,8 @@ export default function Seller() {
   const onSubmit = (data: FormValues) => {
     return new Promise(resolve => setTimeout(resolve, 600)).then(() => {
       addProduct(data);
-      toast.success("Listing created", {
-        description: `${data.name} is now live on the marketplace.`
+      toast.success(t("seller.toastTitle"), {
+        description: t("seller.toastDesc", { name: data.name })
       });
       setLocation("/");
     });
@@ -54,65 +58,65 @@ export default function Seller() {
           transition={{ duration: 0.5 }}
         >
           <div className="mb-8">
-            <h1 className="font-serif text-4xl font-bold tracking-tight mb-2">Sell on Kicks</h1>
-            <p className="text-muted-foreground">List your premium sneakers to our global marketplace of collectors.</p>
+            <h1 className="font-serif text-4xl font-bold tracking-tight mb-2">{t("seller.title")}</h1>
+            <p className="text-muted-foreground">{t("seller.subtitle")}</p>
           </div>
 
           <Card className="border-border/50 bg-secondary/20 backdrop-blur-sm">
             <CardHeader>
-              <CardTitle>Product Details</CardTitle>
-              <CardDescription>Fill out the details below to create your listing.</CardDescription>
+              <CardTitle>{t("seller.details")}</CardTitle>
+              <CardDescription>{t("seller.fillOut")}</CardDescription>
             </CardHeader>
             <CardContent>
               <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
                 <div className="space-y-2">
-                  <Label htmlFor="name">Sneaker Name</Label>
+                  <Label htmlFor="name">{t("seller.nameLabel")}</Label>
                   <Input 
                     id="name" 
-                    placeholder="e.g. Jordan 1 Retro High OG" 
+                    placeholder={t("seller.namePlaceholder")} 
                     {...register("name")}
-                    data-testid="input-name"
                   />
                   {errors.name && <p className="text-sm text-destructive">{errors.name.message}</p>}
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-2">
-                    <Label htmlFor="price">Price (USD)</Label>
+                    <Label htmlFor="price">{t("seller.priceLabel")}</Label>
                     <div className="relative">
-                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">$</span>
+                      <span className={cn(
+                        "absolute top-1/2 -translate-y-1/2 text-muted-foreground",
+                        isRTL ? "right-3" : "left-3"
+                      )}>$</span>
                       <Input 
                         id="price" 
                         type="number" 
                         step="0.01" 
-                        className="pl-7" 
+                        className={isRTL ? "pr-7 text-left font-sans" : "pl-7"} 
                         placeholder="0.00"
                         {...register("price")}
-                        data-testid="input-price"
                       />
                     </div>
                     {errors.price && <p className="text-sm text-destructive">{errors.price.message}</p>}
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="imageUrl">Image URL</Label>
+                    <Label htmlFor="imageUrl">{t("seller.imageLabel")}</Label>
                     <Input 
                       id="imageUrl" 
-                      placeholder="https://example.com/image.jpg"
+                      placeholder={t("seller.imagePlaceholder")}
+                      className="text-left font-sans"
                       {...register("imageUrl")}
-                      data-testid="input-imageurl"
                     />
                     {errors.imageUrl && <p className="text-sm text-destructive">{errors.imageUrl.message}</p>}
                   </div>
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="description">Description</Label>
+                  <Label htmlFor="description">{t("seller.descLabel")}</Label>
                   <Textarea 
                     id="description" 
-                    placeholder="Describe the condition, box included, special features..."
+                    placeholder={t("seller.descPlaceholder")}
                     {...register("description")}
-                    data-testid="input-description"
                   />
                   {errors.description && <p className="text-sm text-destructive">{errors.description.message}</p>}
                 </div>
@@ -121,9 +125,8 @@ export default function Seller() {
                   type="submit" 
                   className="w-full h-12 text-lg font-medium" 
                   disabled={isSubmitting}
-                  data-testid="button-submit-listing"
                 >
-                  {isSubmitting ? "Publishing..." : "Publish Listing"}
+                  {isSubmitting ? t("seller.publishing") : t("seller.publish")}
                 </Button>
               </form>
             </CardContent>
