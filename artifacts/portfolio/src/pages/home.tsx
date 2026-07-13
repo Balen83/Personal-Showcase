@@ -1,89 +1,116 @@
-import React from 'react';
+import { useProducts } from "@/lib/store";
+import { formatPrice, cn } from "@/lib/utils";
+import { RootLayout } from "@/components/layout/RootLayout";
+import { motion } from "framer-motion";
+import { ArrowUpRight } from "lucide-react";
+import { useState } from "react";
 
 export default function Home() {
-  const hobbies = [
-    {
-      title: "Through the Lens",
-      category: "Film Photography",
-      description: "There is a unique magic in analog photography. I spend my weekends walking through the city, capturing quiet moments on 35mm film. The anticipation of waiting for scans to develop teaches me patience and presence."
-    },
-    {
-      title: "The Art of Sourdough",
-      category: "Artisan Baking",
-      description: "What started as a simple curiosity has turned into a weekend ritual. I love the tactile process of mixing flour and water, watching it ferment, and the unmatched aroma of a freshly baked loaf filling the kitchen."
-    },
-    {
-      title: "Finding the Summits",
-      category: "Mountain Hiking",
-      description: "The best way to clear my mind is to head up into the mountains. I try to explore a new trail every month, breathing in the crisp alpine air and enjoying the perspective that only high altitudes can provide."
-    },
-    {
-      title: "Collecting Sounds",
-      category: "Jazz & Vinyl",
-      description: "My evenings are often soundtracked by the crackle of a record player. Building a curated collection of jazz and soul vinyl has been a slow, deeply rewarding journey in active listening."
+  const { products, isLoaded } = useProducts();
+  const [hoveredId, setHoveredId] = useState<string | null>(null);
+
+  const container = {
+    hidden: { opacity: 0 },
+    show: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1
+      }
     }
-  ];
+  };
+
+  const item = {
+    hidden: { opacity: 0, y: 20 },
+    show: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 300, damping: 24 } }
+  };
+
+  if (!isLoaded) return null;
 
   return (
-    <div className="min-h-screen bg-background text-foreground overflow-x-hidden selection:bg-primary selection:text-white">
-      {/* Container */}
-      <main className="max-w-3xl mx-auto px-6 py-24 md:py-32">
+    <RootLayout>
+      {/* Hero Section */}
+      <section className="relative pt-24 pb-16 overflow-hidden">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-white/5 via-background to-background pointer-events-none"></div>
+        <div className="container mx-auto px-6 relative z-10 text-center max-w-4xl">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
+          >
+            <div className="inline-flex items-center rounded-full border border-border/50 bg-secondary/50 px-3 py-1 text-xs font-medium text-muted-foreground mb-6 backdrop-blur-sm">
+              <span className="flex h-2 w-2 rounded-full bg-primary mr-2"></span>
+              New arrivals daily
+            </div>
+            <h1 className="font-serif text-5xl md:text-7xl lg:text-8xl font-bold tracking-tighter mb-6">
+              COVETED.<br className="hidden md:block"/> CURATED.
+            </h1>
+            <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-10 leading-relaxed">
+              The premier destination for authenticated premium sneakers. Buy, sell, and discover the most sought-after silhouettes in the world.
+            </p>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* Grid Section */}
+      <section className="container mx-auto px-6 pb-24">
+        <div className="flex items-end justify-between mb-8">
+          <h2 className="font-serif text-3xl font-bold tracking-tight">Trending Now</h2>
+          <span className="text-sm text-muted-foreground hidden sm:inline-block">Showing {products.length} pairs</span>
+        </div>
         
-        {/* Header Section */}
-        <header className="animate-in fade-in slide-in-from-bottom-8 duration-1000 ease-out fill-mode-both">
-          <h1 className="text-4xl md:text-5xl font-medium tracking-tight mb-8 text-foreground">
-            Welcome to my website
-          </h1>
-          <div className="space-y-6 text-lg md:text-xl text-muted-foreground font-light leading-relaxed max-w-2xl">
-            <p>
-              I am a designer and developer who believes in the power of simplicity. 
-              This is a small corner of the internet where I share the things that 
-              bring me joy away from the keyboard.
-            </p>
-            <p>
-              Take a look around and explore what keeps me inspired.
-            </p>
+        {products.length === 0 ? (
+          <div className="py-20 text-center border border-dashed border-border rounded-xl">
+            <p className="text-muted-foreground">No sneakers listed yet.</p>
           </div>
-        </header>
-
-        {/* Divider */}
-        <div className="h-px w-full bg-border my-16 md:my-24 opacity-50 animate-in fade-in duration-1000 delay-300 fill-mode-both" />
-
-        {/* Hobbies Section */}
-        <section className="space-y-12 animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-500 fill-mode-both">
-          <h2 className="text-2xl font-medium text-foreground/80 mb-10">
-            A few things I love
-          </h2>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12">
-            {hobbies.map((hobby, index) => (
-              <div 
-                key={hobby.title} 
-                className="group flex flex-col space-y-4 p-6 rounded-2xl bg-card border border-card-border hover:shadow-xl hover:-translate-y-1 transition-all duration-300 ease-out"
-                style={{ transitionDelay: `${index * 50}ms` }}
+        ) : (
+          <motion.div 
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
+            variants={container}
+            initial="hidden"
+            animate="show"
+          >
+            {products.map((product) => (
+              <motion.div 
+                key={product.id} 
+                variants={item}
+                className="group cursor-pointer flex flex-col"
+                onMouseEnter={() => setHoveredId(product.id)}
+                onMouseLeave={() => setHoveredId(null)}
+                data-testid={`card-product-${product.id}`}
               >
-                <div>
-                  <span className="text-xs font-semibold uppercase tracking-widest text-primary mb-2 block">
-                    {hobby.category}
-                  </span>
-                  <h3 className="text-xl font-medium text-card-foreground">
-                    {hobby.title}
-                  </h3>
+                <div className="relative aspect-square rounded-xl bg-secondary/30 border border-border/40 overflow-hidden mb-4 p-6 transition-colors group-hover:bg-secondary/50 group-hover:border-border/80 flex items-center justify-center">
+                  <img 
+                    src={product.imageUrl} 
+                    alt={product.name}
+                    className="max-w-[120%] max-h-[120%] object-contain filter drop-shadow-2xl transition-transform duration-700 ease-[0.16,1,0.3,1] group-hover:scale-110 group-hover:-rotate-3"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).src = "https://placehold.co/600x600/1a1a1a/404040?text=No+Image";
+                    }}
+                  />
+                  
+                  {/* Hover Overlay */}
+                  <div className={cn(
+                    "absolute top-4 right-4 w-10 h-10 bg-background/80 backdrop-blur-md rounded-full flex items-center justify-center border border-border/50 transition-all duration-300",
+                    hoveredId === product.id ? "opacity-100 scale-100" : "opacity-0 scale-90"
+                  )}>
+                    <ArrowUpRight className="w-5 h-5" />
+                  </div>
                 </div>
-                <p className="text-muted-foreground leading-relaxed text-sm md:text-base">
-                  {hobby.description}
-                </p>
-              </div>
+                
+                <div className="space-y-1 flex-1">
+                  <div className="flex justify-between items-start gap-4">
+                    <h3 className="font-serif text-lg font-semibold leading-tight line-clamp-1">{product.name}</h3>
+                    <span className="font-medium whitespace-nowrap">{formatPrice(product.price)}</span>
+                  </div>
+                  <p className="text-sm text-muted-foreground line-clamp-2 mt-2 leading-relaxed">
+                    {product.description}
+                  </p>
+                </div>
+              </motion.div>
             ))}
-          </div>
-        </section>
-
-        {/* Footer */}
-        <footer className="mt-32 pb-12 pt-8 border-t border-border opacity-50 text-sm text-center md:text-left text-muted-foreground animate-in fade-in duration-1000 delay-700 fill-mode-both">
-          <p>Designed with intention and care.</p>
-        </footer>
-
-      </main>
-    </div>
+          </motion.div>
+        )}
+      </section>
+    </RootLayout>
   );
 }
