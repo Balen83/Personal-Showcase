@@ -4,6 +4,7 @@ import Home from '@/pages/home';
 import Seller from '@/pages/seller';
 import NotFound from '@/pages/not-found';
 import { LanguageProvider } from '@/lib/language-context';
+import { AuthProvider } from '@/lib/auth-context';
 
 const queryClient = new QueryClient();
 
@@ -21,9 +22,11 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <LanguageProvider>
-        <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, '')}>
-          <Router />
-        </WouterRouter>
+        <AuthProvider>
+          <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, '')}>
+            <Router />
+          </WouterRouter>
+        </AuthProvider>
       </LanguageProvider>
     </QueryClientProvider>
   );

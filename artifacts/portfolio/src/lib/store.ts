@@ -10,6 +10,9 @@ export interface Product {
   price: number;
   imageUrl: string;
   description: string;
+  location: string;
+  sellerEmail: string;
+  sellerName?: string;
 }
 
 const SEED_PRODUCTS: Product[] = [
@@ -18,28 +21,36 @@ const SEED_PRODUCTS: Product[] = [
     name: "Retro High 'Bred' 2016",
     price: 850,
     imageUrl: sneaker1,
-    description: "The classic black and red colorway that started it all. Premium leather construction with dramatic shadowing."
+    description: "The classic black and red colorway that started it all. Premium leather construction with dramatic shadowing.",
+    location: "erbil",
+    sellerEmail: "admin@hb.store"
   },
   {
     id: "2",
     name: "Zebra Knit V2",
     price: 420,
     imageUrl: sneaker2,
-    description: "Iconic black and white zebra-striped woven upper, levitating silhouette."
+    description: "Iconic black and white zebra-striped woven upper, levitating silhouette.",
+    location: "sulaymaniyah",
+    sellerEmail: "admin@hb.store"
   },
   {
     id: "3",
     name: "Patchwork Skate Low",
     price: 1850,
     imageUrl: sneaker3,
-    description: "Highly sought-after collaboration featuring distressed paisley canvas and plaid panels."
+    description: "Highly sought-after collaboration featuring distressed paisley canvas and plaid panels.",
+    location: "duhok",
+    sellerEmail: "admin@hb.store"
   },
   {
     id: "4",
     name: "Deconstructed Runner",
     price: 1100,
     imageUrl: sneaker4,
-    description: "Deconstructed design with exposed mesh, signature red zip-tie, and industrial aesthetic."
+    description: "Deconstructed design with exposed mesh, signature red zip-tie, and industrial aesthetic.",
+    location: "online",
+    sellerEmail: "admin@hb.store"
   }
 ];
 

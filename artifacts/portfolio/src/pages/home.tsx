@@ -1,15 +1,31 @@
-import { useProducts } from "@/lib/store";
+import { useProducts, Product } from "@/lib/store";
 import { formatPrice, cn } from "@/lib/utils";
 import { RootLayout } from "@/components/layout/RootLayout";
 import { motion } from "framer-motion";
-import { ArrowUpRight, ArrowUpLeft } from "lucide-react";
+import { ArrowUpRight, ArrowUpLeft, MapPin, ShoppingBag } from "lucide-react";
 import { useState } from "react";
 import { useLanguage } from "@/lib/language-context";
+import { useAuth } from "@/lib/auth-context";
+import { useOrders } from "@/lib/orders";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 
 export default function Home() {
   const { products, isLoaded } = useProducts();
   const [hoveredId, setHoveredId] = useState<string | null>(null);
+  
   const { t, dir } = useLanguage();
+  const { user, openAuthModal } = useAuth();
+  const { addOrder } = useOrders();
+  
+  const [checkoutProduct, setCheckoutProduct] = useState<Product | null>(null);
+  const [buyerName, setBuyerName] = useState(user?.name || "");
+  const [buyerPhone, setBuyerPhone] = useState("");
+  const [buyerAddress, setBuyerAddress] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const isRTL = dir === "rtl";
 
@@ -25,7 +41,48 @@ export default function Home() {
 
   const item = {
     hidden: { opacity: 0, y: 20 },
-    show: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 300, damping: 24 } }
+    show: { opacity: 1, y: 0, transition: { type: "spring" as const, stiffness: 300, damping: 24 } }
+  };
+
+  const handleBuyClick = (e: React.MouseEvent, product: Product) => {
+    e.stopPropagation();
+    if (!user) {
+      openAuthModal(t("auth.loginToBuy"));
+    } else {
+      setBuyerName(user.name || "");
+      setBuyerPhone("");
+      setBuyerAddress("");
+      setCheckoutProduct(product);
+    }
+  };
+
+  const handleCheckoutSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!user || !checkoutProduct) return;
+    
+    setIsSubmitting(true);
+    
+    // Simulate network request
+    setTimeout(() => {
+      addOrder({
+        productId: checkoutProduct.id,
+        productName: checkoutProduct.name,
+        productPrice: checkoutProduct.price,
+        productImage: checkoutProduct.imageUrl,
+        sellerEmail: checkoutProduct.sellerEmail || "admin@hb.store",
+        buyerEmail: user.email,
+        buyerName,
+        buyerPhone,
+        buyerAddress
+      });
+      
+      setIsSubmitting(false);
+      setCheckoutProduct(null);
+      
+      toast.success(t("checkout.successTitle"), {
+        description: t("checkout.successDesc", { name: checkoutProduct.name })
+      });
+    }, 600);
   };
 
   if (!isLoaded) return null;
@@ -78,7 +135,7 @@ export default function Home() {
               <motion.div 
                 key={product.id} 
                 variants={item}
-                className="group cursor-pointer flex flex-col"
+                className="group flex flex-col relative"
                 onMouseEnter={() => setHoveredId(product.id)}
                 onMouseLeave={() => setHoveredId(null)}
               >
@@ -92,6 +149,17 @@ export default function Home() {
                     }}
                   />
                   
+                  {/* Location Badge */}
+                  {product.location && (
+                    <div className={cn(
+                      "absolute top-4 bg-background/80 backdrop-blur-md rounded-full px-3 py-1 flex items-center border border-border/50 text-xs font-medium",
+                      isRTL ? "right-4" : "left-4"
+                    )}>
+                      <MapPin className={cn("w-3 h-3 text-muted-foreground", isRTL ? "ml-1" : "mr-1")} />
+                      {t(`location.${product.location}`) || product.location}
+                    </div>
+                  )}
+
                   {/* Hover Overlay */}
                   <div className={cn(
                     "absolute top-4 w-10 h-10 bg-background/80 backdrop-blur-md rounded-full flex items-center justify-center border border-border/50 transition-all duration-300",
@@ -100,9 +168,23 @@ export default function Home() {
                   )}>
                     {isRTL ? <ArrowUpLeft className="w-5 h-5" /> : <ArrowUpRight className="w-5 h-5" />}
                   </div>
+
+                  {/* Quick Buy Action */}
+                  <div className={cn(
+                    "absolute bottom-4 left-4 right-4 flex transition-all duration-300",
+                    hoveredId === product.id ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
+                  )}>
+                    <Button 
+                      onClick={(e) => handleBuyClick(e, product)}
+                      className="w-full shadow-lg h-11"
+                    >
+                      <ShoppingBag className={cn("w-4 h-4", isRTL ? "ml-2" : "mr-2")} />
+                      {t("checkout.buyNow")}
+                    </Button>
+                  </div>
                 </div>
                 
-                <div className="space-y-1 flex-1">
+                <div className="space-y-1 flex-1 px-1">
                   <div className="flex justify-between items-start gap-4">
                     <h3 className="font-serif text-lg font-semibold leading-tight line-clamp-1">{product.name}</h3>
                     <span className="font-medium whitespace-nowrap">{formatPrice(product.price)}</span>
@@ -116,6 +198,69 @@ export default function Home() {
           </motion.div>
         )}
       </section>
+
+      {/* Checkout Dialog */}
+      <Dialog open={!!checkoutProduct} onOpenChange={(open) => !open && setCheckoutProduct(null)}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>{t("checkout.title")}</DialogTitle>
+            <DialogDescription>
+              {checkoutProduct ? t("checkout.subtitle", { name: checkoutProduct.name }) : ""}
+            </DialogDescription>
+          </DialogHeader>
+          
+          {checkoutProduct && (
+            <div className="flex items-center gap-4 py-4 border-b border-border/40">
+              <div className="w-16 h-16 rounded-md bg-secondary/50 flex items-center justify-center p-2">
+                <img src={checkoutProduct.imageUrl} alt={checkoutProduct.name} className="max-w-full max-h-full object-contain drop-shadow-md" />
+              </div>
+              <div>
+                <p className="font-serif font-medium">{checkoutProduct.name}</p>
+                <p className="text-lg font-semibold mt-1">{formatPrice(checkoutProduct.price)}</p>
+              </div>
+            </div>
+          )}
+
+          <form onSubmit={handleCheckoutSubmit} className="space-y-4 pt-2">
+            <div className="space-y-2">
+              <Label htmlFor="buyerName">{t("checkout.name")}</Label>
+              <Input
+                id="buyerName"
+                required
+                value={buyerName}
+                onChange={(e) => setBuyerName(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="buyerPhone">{t("checkout.phone")}</Label>
+              <Input
+                id="buyerPhone"
+                required
+                dir="ltr"
+                className="text-left font-sans"
+                value={buyerPhone}
+                onChange={(e) => setBuyerPhone(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="buyerAddress">{t("checkout.address")}</Label>
+              <Input
+                id="buyerAddress"
+                required
+                value={buyerAddress}
+                onChange={(e) => setBuyerAddress(e.target.value)}
+              />
+            </div>
+            
+            <div className="pt-4">
+              <Button type="submit" className="w-full h-12 text-lg" disabled={isSubmitting}>
+                {isSubmitting ? "..." : t("checkout.submit")}
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
+
     </RootLayout>
   );
 }
