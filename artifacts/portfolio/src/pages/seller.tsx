@@ -16,8 +16,9 @@ import { toast } from "sonner";
 import { motion } from "framer-motion";
 import { useLanguage } from "@/lib/language-context";
 import { cn, formatPrice, formatDate } from "@/lib/utils";
-import { MapPin, Phone, User, Package, Calendar } from "lucide-react";
-import { useEffect } from "react";
+import { MapPin, Phone, User, Package, Calendar, Upload, ImageOff } from "lucide-react";
+import { useEffect, useState, useRef } from "react";
+import { fileToResizedBase64 } from "@/lib/image-utils";
 
 export default function Seller() {
   const { addProduct } = useProducts();
@@ -38,7 +39,7 @@ export default function Seller() {
   const formSchema = z.object({
     name: z.string().min(2, t("error.name")),
     price: z.coerce.number().positive(t("error.price")),
-    imageUrl: z.string().url(t("error.url")),
+    imageUrl: z.string().min(1, t("error.image")),
     description: z.string().min(10, t("error.desc")),
     location: z.string().min(2, t("location.placeholder")),
   });
@@ -55,6 +56,9 @@ export default function Seller() {
       location: ""
     }
   });
+
+  const [isProcessingImage, setIsProcessingImage] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const onSubmit = (data: FormValues) => {
     if (!user) return;
@@ -156,12 +160,56 @@ export default function Seller() {
 
                   <div className="space-y-2">
                     <Label htmlFor="imageUrl">{t("seller.imageLabel")}</Label>
-                    <Input 
-                      id="imageUrl" 
-                      placeholder={t("seller.imagePlaceholder")}
-                      className="text-left font-sans"
-                      dir="ltr"
-                      {...register("imageUrl")}
+                    <Controller
+                      name="imageUrl"
+                      control={control}
+                      render={({ field }) => (
+                        <div>
+                          <input
+                            ref={fileInputRef}
+                            id="imageUrl"
+                            type="file"
+                            accept="image/*"
+                            className="hidden"
+                            onChange={async (e) => {
+                              const file = e.target.files?.[0];
+                              if (!file) return;
+                              setIsProcessingImage(true);
+                              try {
+                                const base64 = await fileToResizedBase64(file);
+                                field.onChange(base64);
+                              } catch (err) {
+                                toast.error(t("error.image"));
+                              } finally {
+                                setIsProcessingImage(false);
+                              }
+                            }}
+                          />
+                          <div
+                            onClick={() => fileInputRef.current?.click()}
+                            className="flex items-center gap-4 rounded-md border border-dashed border-border bg-secondary/10 hover:bg-secondary/20 transition-colors p-3 cursor-pointer"
+                          >
+                            <div className="w-16 h-16 rounded-md bg-secondary/40 shrink-0 flex items-center justify-center overflow-hidden border border-border/40">
+                              {field.value ? (
+                                <img src={field.value} alt="" className="w-full h-full object-cover" />
+                              ) : (
+                                <ImageOff className="w-6 h-6 text-muted-foreground opacity-60" />
+                              )}
+                            </div>
+                            <div className="flex-1">
+                              <div className="inline-flex items-center gap-2 text-sm font-medium">
+                                <Upload className="w-4 h-4" />
+                                {isProcessingImage
+                                  ? t("seller.uploadingPhoto")
+                                  : field.value
+                                    ? t("seller.changePhoto")
+                                    : t("seller.uploadPhoto")}
+                              </div>
+                              <p className="text-xs text-muted-foreground mt-1">{t("seller.uploadHint")}</p>
+                            </div>
+                          </div>
+                        </div>
+                      )}
                     />
                     {errors.imageUrl && <p className="text-sm text-destructive">{errors.imageUrl.message}</p>}
                   </div>
