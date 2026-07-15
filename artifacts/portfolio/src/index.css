@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Syne:wght@400;500;600;700;800&family=Vazirmatn:wght@400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Syne:wght@400;500;600;700;800&family=Vazirmatn:wght@400;500;600;700;800&family=Readex+Pro:wght@400;500;600;700&display=swap');
 @import 'tailwindcss';
 @import 'tw-animate-css';
 @plugin "@tailwindcss/typography";
@@ -76,14 +76,15 @@
   --destructive: 0 84% 60%;
   --destructive-foreground: 0 0% 100%;
 
-  --app-font-sans: 'Plus Jakarta Sans', sans-serif;
-  --app-font-serif: 'Syne', sans-serif;
+  --app-font-sans: 'Readex Pro', 'Plus Jakarta Sans', sans-serif;
+  --app-font-serif: 'Readex Pro', 'Syne', sans-serif;
   --radius: 0.5rem;
+  --gold: 43 55% 58%;
 }
 
 html.font-arabic {
-  --app-font-sans: 'Vazirmatn', sans-serif;
-  --app-font-serif: 'Vazirmatn', sans-serif;
+  --app-font-sans: 'Readex Pro', 'Vazirmatn', sans-serif;
+  --app-font-serif: 'Readex Pro', 'Vazirmatn', sans-serif;
 }
 
 @layer base {
@@ -93,11 +94,30 @@ html.font-arabic {
 
   body {
     @apply font-sans antialiased bg-background text-foreground;
+    background-image: radial-gradient(circle at 15% 0%, rgba(212, 175, 55, 0.06), transparent 40%),
+      radial-gradient(circle at 85% 100%, rgba(212, 175, 55, 0.04), transparent 45%);
   }
   
   h1, h2, h3, h4, h5, h6 {
     @apply font-serif tracking-tight;
   }
+}
+
+.glass-card {
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.01));
+  backdrop-filter: blur(14px);
+  border: 1px solid rgba(212, 175, 55, 0.14);
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.35s ease, border-color 0.35s ease;
+}
+
+.glass-card:hover {
+  transform: translateY(-4px) scale(1.015);
+  border-color: rgba(212, 175, 55, 0.45);
+  box-shadow: 0 20px 40px -20px rgba(212, 175, 55, 0.35), 0 0 0 1px rgba(212, 175, 55, 0.1);
+}
+
+.text-gold {
+  color: #D4AF37;
 }
 
 ::-webkit-scrollbar {

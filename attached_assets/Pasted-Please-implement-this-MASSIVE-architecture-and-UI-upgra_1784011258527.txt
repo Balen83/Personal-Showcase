@@ -1,0 +1,27 @@
+Please implement this MASSIVE architecture and UI upgrade for our platform. Combine all features below while maintaining a premium dark luxury aesthetic:
+
+1. BRANDING, FONTS & ABOUT SECTION:
+   - Change the platform name globally from "HB.store" to "ڕەشماڵ" (Rashmal).
+   - Apply a beautiful, modern Kurdish font globally (e.g., 'Readex Pro' or 'Vazirmatn' from Google Fonts) to replace standard serif/sans-serif text.
+   - In the Hero section, change the text "خوازراو. ناوازە." to "خوازراو و ناوازە" (smooth flow, remove the dots).
+   - Add a premium "About Us" (دەربارە) section at the bottom explaining that Rashmal is Kurdistan's premier marketplace for high-quality used & brand sneakers, promoting sustainability.
+
+2. HIERARCHICAL ADMIN SYSTEM (SUPER ADMIN):
+   - Hardcode the email "Balenwarty19@gmail.com" as the absolute "Super Admin".
+   - When Balenwarty19@gmail.com logs in, unlock a special "Admin Panel" with a "Manage Team" (بەڕێوەبردنی ستاف) section. In this section, the Super Admin can type any registered user's email to promote them to "Admin" (Moderator) or demote them back.
+   - Both the Super Admin and promoted Admins have a "Delete Product" button on the marketplace. Standard Admins CANNOT access "Manage Team", cannot delete the Super Admin, and cannot modify other admin roles.
+
+3. IN-APP LIVE CHAT & SHARED DATABASE ROUTING:
+   - Replace local LocalStorage context with a simulated shared global state/backend on Replit so data, orders, and chats sync correctly across different simulated browser sessions/devices.
+   - Add a "Chat with Seller" (چات لەگەڵ فرۆشیار) button on every shoe product page. Clicking it opens a real-time, elegant chat modal.
+   - Add a "Messages" (نامەکان) tab to the Dashboard for users to manage active buyer-seller conversations.
+
+4. USER PROFILE & SELLER CONTROLS:
+   - Profile Pictures: Users can upload a profile picture during Sign Up or Profile Edit (converted automatically to a Base64 string).
+   - Product Management: Sellers can Delete or Edit their own listed sneakers, or toggle a button to mark them as "Sold" (فرۆشراوە) which applies a prominent badge over the product card.
+
+5. PINNED PRODUCTS & VIEW COUNTER:
+   - Pinned Products: Super Admin and Admins can "Pin" (پینکردن) specific sneakers. Pinned products will be featured at the very top of the homepage with a countdown timer (e.g., ticking down from 12 hours).
+   - View Counter: Track and display views for each sneaker card dynamically (e.g., "١٥٠ بینەر" / "150 views").
+
+Ensure all newly added modules, buttons, error messages, and labels are beautifully integrated, fully responsive, and supported across Kurdish, English, and Arabic.

@@ -1,0 +1,47 @@
+[2026/07/15 01:28 د.ن] 𝐵𝒂𝒍𝒍𝒆𝒏: Please fix the current runtime error ("useLanguage must be used within LanguageProvider") and upgrade the platform architecture by implementing ALL the features below in a single execution, maintaining our premium dark luxury theme:
+
+1. BRANDING, FONTS & ABOUT SECTION:
+   - Change the platform name globally from "HB.store" to "ڕەشماڵ" (Rashmal).
+   - Apply a beautiful, modern Kurdish font globally (e.g., 'Readex Pro' or 'Vazirmatn' from Google Fonts).
+   - In the Hero section, change the text "خوازراو. ناوازە." to "خوازراو و ناوازە" (smooth flow, remove periods).
+   - Add a premium "About Us" (دەربارە) section at the bottom describing Rashmal as Kurdistan's premier marketplace for high-quality sneakers, promoting sustainability.
+
+2. VISUAL IDENTITY, CUSTOM SVG LOGO & PREMIUM UI:
+   - Create a premium, custom SVG logo at the top header representing a stylized, minimalist modern "Tent" (ڕەشماڵ) combined with a sleek aesthetic.
+   - Implement a "Stealth Luxury / Glassmorphic" design style: Use deep carbon black and charcoal backgrounds, with frosted-glass card layouts and elegant glowing gold (#D4AF37) or amber accents.
+   - Add smooth CSS hover transitions to the sneaker cards (subtle scale-up and soft shadow glow on hover).
+
+3. HIERARCHICAL ADMIN SYSTEM & ACCOUNT BADGES:
+   - Hardcode the email "Balenwarty19@gmail.com" as the absolute "Super Admin".
+   - Super Admin dashboard gets a "Manage Team" section to promote/demote registered users to "Admin" status.
+   - Display distinct badges next to user names across the app:
+     * For "Balenwarty19@gmail.com": Show a premium gold tag "دروستکەر 👑".
+     * For Promoted Admins: Show a sleek blue/grey tag "ئەدمین 🛡️".
+     * For Verified Stores (like "HB.store"): Show a prominent blue verification checkmark (Verified Badge ✅).
+   - Both Super Admin and Admins can delete any product. Standard Admins cannot access "Manage Team" or modify other admins.
+
+4. IN-APP LIVE CHAT & SHARED STATE:
+   - Replace local LocalStorage context with a simulated shared global state on Replit so data, messages, and listings sync properly across browser sessions.
+   - Add a "Chat with Seller" (چات لەگەڵ فرۆشیار) button on every shoe product page opening an elegant chat modal.
+   - Add a "Messages" (نامەکان) tab to the user dashboard to manage active chats.
+
+5. USER PROFILE, SELLER CONTROLS & SOCIAL SYSTEM:
+   - Profile Customization: Allow ALL users (buyers and sellers) to set and edit their display name and upload a profile picture (saved as Base64) during Sign Up or from their Profile settings.
+   - Followers & Following System: Users can follow/unfollow other users and stores. Display the count of "Followers" (فۆڵۆوەران) and "Following" (فۆڵۆوکراوان) on every user's public profile page. Add a "Following" tab on the homepage to let users filter and see listings only from sellers they follow.
+   - Product Upload: When listing a sneaker, it is mandatory for the seller to specify the Shoe Size (سایز).
+   - Multiple Images: Allow sellers to upload up to 4 images for a single listing, displayed as a swipeable gallery/carousel on the product page.
+   - Dual Currency Support: Sellers can choose to list their price in USD ($) or IQD (د.ع), styled beautifully on product cards.
+   - Product Management: Sellers can Delete/Edit their own listed sneakers, or toggle them as "Sold" (فرۆشراوە) which overlays a prominent badge on the card.
+
+6. PINNED PRODUCTS, VIEW COUNTER, & WISHLIST:
+   - Pinned Products: Super Admin and Admins can "Pin" (پینکردن) specific sneakers to feature them at the top of the homepage with a 12-hour countdown timer.
+   - View Counter: Track and display views for each sneaker card dynamically (e.g., "١٥٠ بینەر" / "150 views").
+   - Wishlist (دڵخوازەکانم): Add a heart icon (❤️) on product cards. Users can save items to a dedicated "Wishlist" section in their dashboard.
+[2026/07/15 01:28 د.ن] 𝐵𝒂𝒍𝒍𝒆𝒏: 7. ADVANCED TRANSACTION FEATURES:
+   - Offer a Price (معامەلە): Add an "Offer a Price" button in the chat modal, allowing buyers to propose a custom offer that sellers can accept or reject.
+   - Size Alerts (ئاگادارکەرەوەی قەبارە): Allow users to subscribe to size-specific alerts for brands/models. Notify them in-app when a sneaker of that size is newly listed.
+   - Verified Authentic Badge: Super Admin and Admins can flag premium items with a golden "١٠٠٪ ئۆرجیناڵ / Verified Authentic" badge after verification.
+   - Quick Share (هاوبەشکردنی خێرا): Add a share button on product pages to easily copy the listing link or share to platforms like Instagram, WhatsApp, and Snapchat.
+   - Condition Rating (پێوەرى پاکی): Sellers must rate their sneaker condition out of 10 (e.g., "9/10 - Extremely Clean") which displays on the card.
+
+Ensure all interfaces, modals, notifications, and buttons are fully responsive, modern, and localized in Kurdish, English, and Arabic.

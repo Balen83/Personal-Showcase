@@ -10,6 +10,16 @@ servers:
 tags:
   - name: health
     description: Health operations
+  - name: auth
+    description: Authentication and user profile
+  - name: products
+    description: Sneaker listings
+  - name: orders
+    description: Buyer orders
+  - name: conversations
+    description: Buyer/seller chat
+  - name: wishlist
+    description: Saved / wishlisted products
 paths:
   /healthz:
     get:
@@ -24,6 +34,438 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  /auth/signup:
+    post:
+      operationId: signup
+      tags: [auth]
+      summary: Create an account
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SignupInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        "400":
+          description: Invalid input or email already registered
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /auth/login:
+    post:
+      operationId: login
+      tags: [auth]
+      summary: Log in with email and password
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginInput"
+      responses:
+        "200":
+          description: Logged in
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        "401":
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /users:
+    get:
+      operationId: listUsers
+      tags: [auth]
+      summary: List all registered users (used by admin panel)
+      responses:
+        "200":
+          description: Users
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/User"
+
+  /users/{email}:
+    patch:
+      operationId: updateUser
+      tags: [auth]
+      summary: Update a user's profile (name / avatar)
+      parameters:
+        - name: email
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserUpdate"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /users/{email}/role:
+    patch:
+      operationId: updateUserRole
+      tags: [auth]
+      summary: Promote or demote a user (super admin only)
+      parameters:
+        - name: email
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RoleUpdate"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        "403":
+          description: Not authorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /products:
+    get:
+      operationId: listProducts
+      tags: [products]
+      summary: List all products (pinned + active first)
+      responses:
+        "200":
+          description: Products
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Product"
+    post:
+      operationId: createProduct
+      tags: [products]
+      summary: Create a product listing
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProductInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Product"
+
+  /products/{id}:
+    patch:
+      operationId: updateProduct
+      tags: [products]
+      summary: Edit, mark sold, or pin/unpin a product
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProductUpdate"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Product"
+        "403":
+          description: Not authorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    delete:
+      operationId: deleteProduct
+      tags: [products]
+      summary: Delete a product (owner or admin)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProductDelete"
+      responses:
+        "204":
+          description: Deleted
+        "403":
+          description: Not authorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /products/{id}/view:
+    post:
+      operationId: recordProductView
+      tags: [products]
+      summary: Increment a product's view counter
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Updated view count
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Product"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /wishlist:
+    get:
+      operationId: listWishlist
+      tags: [wishlist]
+      summary: List product ids wishlisted by a user
+      parameters:
+        - name: email
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Wishlist entries
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/WishlistEntry"
+    post:
+      operationId: addWishlistItem
+      tags: [wishlist]
+      summary: Add a product to a user's wishlist
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/WishlistInput"
+      responses:
+        "201":
+          description: Added
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WishlistEntry"
+
+  /wishlist/{id}:
+    delete:
+      operationId: removeWishlistItem
+      tags: [wishlist]
+      summary: Remove a wishlist entry by its id
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Removed
+
+  /orders:
+    get:
+      operationId: listOrders
+      tags: [orders]
+      summary: List orders for a buyer or seller email
+      parameters:
+        - name: email
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Orders
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Order"
+    post:
+      operationId: createOrder
+      tags: [orders]
+      summary: Place an order
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/OrderInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Order"
+
+  /conversations:
+    get:
+      operationId: listConversations
+      tags: [conversations]
+      summary: List conversations involving an email (as buyer or seller)
+      parameters:
+        - name: email
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Conversations
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Conversation"
+    post:
+      operationId: createConversation
+      tags: [conversations]
+      summary: Start (or fetch existing) conversation about a product
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ConversationInput"
+      responses:
+        "201":
+          description: Created or existing
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Conversation"
+
+  /conversations/{id}/messages:
+    get:
+      operationId: listMessages
+      tags: [conversations]
+      summary: List messages in a conversation
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Messages
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Message"
+    post:
+      operationId: createMessage
+      tags: [conversations]
+      summary: Send a message in a conversation
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MessageInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Message"
+
 components:
   schemas:
     HealthStatus:
@@ -34,3 +476,254 @@ components:
       required:
         - status
 
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+      required:
+        - error
+
+    User:
+      type: object
+      required: [email, role, createdAt]
+      properties:
+        email: { type: string }
+        name: { type: ["string", "null"] }
+        avatarUrl: { type: ["string", "null"] }
+        role: { type: string, enum: [user, admin, super_admin] }
+        createdAt: { type: string, format: date-time }
+
+    SignupInput:
+      type: object
+      required: [email, password]
+      properties:
+        email: { type: string }
+        password: { type: string, minLength: 6 }
+        name: { type: string }
+        avatarUrl: { type: string }
+
+    LoginInput:
+      type: object
+      required: [email, password]
+      properties:
+        email: { type: string }
+        password: { type: string }
+
+    UserUpdate:
+      type: object
+      properties:
+        name: { type: string }
+        avatarUrl: { type: string }
+
+    RoleUpdate:
+      type: object
+      required: [actorEmail, role]
+      properties:
+        actorEmail: { type: string }
+        role: { type: string, enum: [user, admin] }
+
+    Product:
+      type: object
+      required:
+        [
+          id,
+          name,
+          price,
+          currency,
+          imageUrl,
+          images,
+          size,
+          description,
+          location,
+          sellerEmail,
+          sold,
+          pinned,
+          verified,
+          views,
+          createdAt,
+        ]
+      properties:
+        id: { type: integer }
+        name: { type: string }
+        price: { type: number }
+        currency: { type: string, enum: [usd, iqd] }
+        imageUrl: { type: string }
+        images: { type: array, items: { type: string } }
+        size: { type: string }
+        conditionRating: { type: ["integer", "null"] }
+        description: { type: string }
+        location: { type: string }
+        sellerEmail: { type: string }
+        sellerName: { type: ["string", "null"] }
+        sold: { type: boolean }
+        pinned: { type: boolean }
+        pinnedUntil: { type: ["string", "null"], format: date-time }
+        verified: { type: boolean }
+        views: { type: integer }
+        createdAt: { type: string, format: date-time }
+
+    ProductInput:
+      type: object
+      required: [name, price, imageUrl, description, location, sellerEmail, size]
+      properties:
+        name: { type: string }
+        price: { type: number }
+        currency: { type: string, enum: [usd, iqd] }
+        imageUrl: { type: string }
+        images: { type: array, items: { type: string } }
+        size: { type: string }
+        conditionRating: { type: integer }
+        description: { type: string }
+        location: { type: string }
+        sellerEmail: { type: string }
+        sellerName: { type: string }
+
+    ProductDelete:
+      type: object
+      required: [actorEmail]
+      properties:
+        actorEmail: { type: string }
+
+    ProductUpdate:
+      type: object
+      required: [actorEmail]
+      properties:
+        actorEmail: { type: string }
+        name: { type: string }
+        price: { type: number }
+        currency: { type: string, enum: [usd, iqd] }
+        imageUrl: { type: string }
+        images: { type: array, items: { type: string } }
+        size: { type: string }
+        conditionRating: { type: integer }
+        description: { type: string }
+        location: { type: string }
+        sold: { type: boolean }
+        pinned: { type: boolean }
+        pinHours: { type: number }
+        verified: { type: boolean }
+
+    WishlistEntry:
+      type: object
+      required: [id, userEmail, productId, createdAt]
+      properties:
+        id: { type: integer }
+        userEmail: { type: string }
+        productId: { type: integer }
+        createdAt: { type: string, format: date-time }
+
+    WishlistInput:
+      type: object
+      required: [userEmail, productId]
+      properties:
+        userEmail: { type: string }
+        productId: { type: integer }
+
+    Order:
+      type: object
+      required:
+        [
+          id,
+          productId,
+          productName,
+          productPrice,
+          productImage,
+          sellerEmail,
+          buyerEmail,
+          buyerName,
+          buyerPhone,
+          buyerAddress,
+          createdAt,
+        ]
+      properties:
+        id: { type: integer }
+        productId: { type: integer }
+        productName: { type: string }
+        productPrice: { type: number }
+        productImage: { type: string }
+        sellerEmail: { type: string }
+        buyerEmail: { type: string }
+        buyerName: { type: string }
+        buyerPhone: { type: string }
+        buyerAddress: { type: string }
+        createdAt: { type: string, format: date-time }
+
+    OrderInput:
+      type: object
+      required:
+        [
+          productId,
+          productName,
+          productPrice,
+          productImage,
+          sellerEmail,
+          buyerEmail,
+          buyerName,
+          buyerPhone,
+          buyerAddress,
+        ]
+      properties:
+        productId: { type: integer }
+        productName: { type: string }
+        productPrice: { type: number }
+        productImage: { type: string }
+        sellerEmail: { type: string }
+        buyerEmail: { type: string }
+        buyerName: { type: string }
+        buyerPhone: { type: string }
+        buyerAddress: { type: string }
+
+    Conversation:
+      type: object
+      required:
+        [
+          id,
+          productId,
+          productName,
+          productImage,
+          sellerEmail,
+          buyerEmail,
+          lastMessageAt,
+          createdAt,
+        ]
+      properties:
+        id: { type: integer }
+        productId: { type: integer }
+        productName: { type: string }
+        productImage: { type: string }
+        sellerEmail: { type: string }
+        sellerName: { type: ["string", "null"] }
+        buyerEmail: { type: string }
+        buyerName: { type: ["string", "null"] }
+        lastMessageAt: { type: string, format: date-time }
+        createdAt: { type: string, format: date-time }
+
+    ConversationInput:
+      type: object
+      required: [productId, productName, productImage, sellerEmail, buyerEmail]
+      properties:
+        productId: { type: integer }
+        productName: { type: string }
+        productImage: { type: string }
+        sellerEmail: { type: string }
+        sellerName: { type: string }
+        buyerEmail: { type: string }
+        buyerName: { type: string }
+
+    Message:
+      type: object
+      required: [id, conversationId, senderEmail, text, createdAt]
+      properties:
+        id: { type: integer }
+        conversationId: { type: integer }
+        senderEmail: { type: string }
+        text: { type: string }
+        createdAt: { type: string, format: date-time }
+
+    MessageInput:
+      type: object
+      required: [senderEmail, text]
+      properties:
+        senderEmail: { type: string }
+        text: { type: string, minLength: 1 }
