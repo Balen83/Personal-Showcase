@@ -1,6 +1,6 @@
 {
-  "cleanUrls": true,
   "rewrites": [
-    { "source": "/(.*)", "destination": "/artifacts/portfolio/index.html" }
+    { "source": "/", "destination": "/artifacts/portfolio/index.html" },
+    { "source": "/:path*", "destination": "/artifacts/portfolio/:path*" }
   ]
 }
